@@ -350,11 +350,7 @@ impl eframe::App for TemplateApp {
 
                             if r.clicked() {
                                 // apply sorting
-                                match update_new_load_order(
-                                    data.game,
-                                    &data.new_order,
-                                    self.settings.config.clone(),
-                                ) {
+                                match update_new_load_order(data.game, &data.new_order) {
                                     Ok(_) => {
                                         info!("Update successful");
                                     }

@@ -3,7 +3,7 @@
 ////////////////////////////////////////////////////////////////////////
 use std::{
     fmt::Display,
-    io::{BufRead, Error, ErrorKind, Read, Result, Seek},
+    io::{BufRead, Error, Read, Result, Seek},
 };
 
 use log::warn;
@@ -276,10 +276,7 @@ impl TParser<Order> for Order {
             // each line gets tokenized
             for token in parser.tokenize(line) {
                 if !token.ends_with(']') && !parser.ends_with_vec(&token) {
-                    return Err(Error::new(
-                        ErrorKind::Other,
-                        "Parsing error: tokenize failed",
-                    ));
+                    return Err(Error::other("Parsing error: tokenize failed"));
                 }
                 names.push(token);
             }
@@ -289,8 +286,7 @@ impl TParser<Order> for Order {
 
         if this.names.len() < 2 {
             warn!("Malformed Order rule: less than 2 expressions");
-            return Err(Error::new(
-                ErrorKind::Other,
+            return Err(Error::other(
                 "Malformed Order rule: less than 2 expressions",
             ));
         }
@@ -329,10 +325,7 @@ impl TParser<NearStart> for NearStart {
             // each line gets tokenized
             for token in parser.tokenize(line) {
                 if !token.ends_with(']') && !parser.ends_with_vec(&token) {
-                    return Err(Error::new(
-                        ErrorKind::Other,
-                        "Parsing error: tokenize failed",
-                    ));
+                    return Err(Error::other("Parsing error: tokenize failed"));
                 }
                 names.push(token);
             }
@@ -374,10 +367,7 @@ impl TParser<NearEnd> for NearEnd {
             // each line gets tokenized
             for token in parser.tokenize(line) {
                 if !token.ends_with(']') && !parser.ends_with_vec(&token) {
-                    return Err(Error::new(
-                        ErrorKind::Other,
-                        "Parsing error: tokenize failed",
-                    ));
+                    return Err(Error::other("Parsing error: tokenize failed"));
                 }
                 names.push(token);
             }
@@ -468,10 +458,7 @@ impl TParser<Note> for Note {
 
         if this.expressions.is_empty() {
             warn!("Malformed Note rule: no expressions parsed");
-            return Err(Error::new(
-                ErrorKind::Other,
-                "Malformed Note rule: no expressions parsed",
-            ));
+            return Err(Error::other("Malformed Note rule: no expressions parsed"));
         }
 
         Ok(())
@@ -550,8 +537,7 @@ impl TParser<Conflict> for Conflict {
 
         if this.expressions.is_empty() {
             warn!("Malformed Conflict rule: no expressions parsed");
-            return Err(Error::new(
-                ErrorKind::Other,
+            return Err(Error::other(
                 "Malformed Conflict rule: no expressions parsed",
             ));
         }
@@ -647,8 +633,7 @@ impl TParser<Requires> for Requires {
         let expressions = parser.parse_expressions(reader)?;
         if expressions.len() != 2 {
             warn!("Malformed Requires rule: more than 2 expressions");
-            return Err(Error::new(
-                ErrorKind::Other,
+            return Err(Error::other(
                 "Malformed Requires rule: more than 2 expressions",
             ));
         }
@@ -749,8 +734,7 @@ impl TParser<Patch> for Patch {
         let expressions = parser.parse_expressions(reader)?;
         if expressions.len() != 2 {
             warn!("Malformed Patch rule: not exactly 2 expressions");
-            return Err(Error::new(
-                ErrorKind::Other,
+            return Err(Error::other(
                 "Malformed Patch rule: not exactly 2 expressions",
             ));
         }

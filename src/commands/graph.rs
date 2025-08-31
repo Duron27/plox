@@ -11,7 +11,6 @@ pub fn graph(
     game_folder: &Option<PathBuf>,
     rules_path: &Option<String>,
     mod_list: &Option<PathBuf>,
-    config: Option<PathBuf>,
 ) -> ExitCode {
     // get game root
     let root = match game_folder {
@@ -36,7 +35,7 @@ pub fn graph(
         mods = match game {
             ESupportedGame::Morrowind => gather_tes3_mods(&root),
             ESupportedGame::Cyberpunk => gather_cp77_mods(&root, &game_version),
-            ESupportedGame::Openmw => gather_openmw_mods(&config),
+            ESupportedGame::Openmw => gather_openmw_mods(),
         };
         if mods.is_empty() {
             info!("No mods found");

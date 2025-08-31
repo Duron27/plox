@@ -554,7 +554,7 @@ mod integration_tests {
 
         let root_path = "./tests";
 
-        let mods = gather_mods(&root_path, ESupportedGame::Cyberpunk, &None, None);
+        let mods = gather_mods(&root_path, ESupportedGame::Cyberpunk, &None);
         assert_eq!(
             mods.iter().map(|s| s.name.to_owned()).collect::<Vec<_>>(),
             vec![

@@ -19,7 +19,6 @@ use byteorder::{LittleEndian, ReadBytesExt};
 use filetime::set_file_mtime;
 use ini::Ini;
 use log::{error, info, warn};
-use openmw_cfg::config_path;
 use regex::Regex;
 use rules::*;
 use semver::Version;
@@ -291,7 +290,6 @@ pub fn gather_mods<P>(
     root: &P,
     game: ESupportedGame,
     game_version: &Option<String>,
-    config: Option<P>,
 ) -> Vec<PluginData>
 where
     P: AsRef<Path>,
@@ -299,7 +297,7 @@ where
     match game {
         ESupportedGame::Morrowind => gather_tes3_mods(root),
         ESupportedGame::Cyberpunk => gather_cp77_mods(root, game_version),
-        ESupportedGame::Openmw => gather_openmw_mods(&config),
+        ESupportedGame::Openmw => gather_openmw_mods(),
     }
 }
 
@@ -393,21 +391,9 @@ where
     names
 }
 
-pub fn gather_openmw_mods<P>(config: &Option<P>) -> Vec<PluginData>
-where
-    P: AsRef<Path>,
-{
+pub fn gather_openmw_mods() -> Vec<PluginData> {
     // parse cfg
-    let mut path = config_path();
-    if let Some(config_path) = config {
-        if config_path.as_ref().exists() {
-            path = config_path.as_ref().to_path_buf();
-        } else {
-            error!("openmw.cfg not found at {}", config_path.as_ref().display());
-        }
-    }
-
-    if let Ok(cfg) = openmw_cfg::Ini::load_from_file_noescape(path) {
+    if let Ok(cfg) = openmw_cfg::get_config() {
         if let Ok(files) = openmw_cfg::get_plugins(&cfg) {
             let names = files.iter().filter_map(|f| map_data(f)).collect::<Vec<_>>();
             return names;
@@ -620,14 +606,10 @@ where
 }
 
 /// Update on disk
-pub fn update_new_load_order<P: AsRef<Path>>(
-    game: ESupportedGame,
-    result: &[String],
-    config: Option<P>,
-) -> std::io::Result<()> {
+pub fn update_new_load_order(game: ESupportedGame, result: &[String]) -> std::io::Result<()> {
     match game {
         ESupportedGame::Morrowind => update_tes3(PathBuf::from("Morrowind.ini"), result, false),
-        ESupportedGame::Openmw => update_openmw(result, config),
+        ESupportedGame::Openmw => update_openmw(result),
         ESupportedGame::Cyberpunk => update_cp77(result),
     }
 }
@@ -637,18 +619,11 @@ fn update_cp77(_result: &[String]) -> std::io::Result<()> {
     panic!("Not implemented")
 }
 
-fn update_openmw<P: AsRef<Path>>(result: &[String], config: Option<P>) -> std::io::Result<()> {
+fn update_openmw(result: &[String]) -> std::io::Result<()> {
     // in openMW we just update the cfg with the new order
-    let mut path = config_path();
-    if let Some(config_path) = config {
-        if config_path.as_ref().exists() {
-            path = config_path.as_ref().to_path_buf();
-        } else {
-            error!("openmw.cfg not found at {}", config_path.as_ref().display());
-        }
-    }
+    if let Ok(_cfg) = openmw_cfg::get_config() {
+        let path = openmw_cfg::config_path();
 
-    if let Ok(_cfg) = openmw_cfg::Ini::load_from_file_noescape(&path) {
         // parse ini
         let mut buf = Vec::new();
         for line in read_lines(&path)?.map_while(Result::ok) {

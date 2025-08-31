@@ -2,11 +2,7 @@
 
 mod app;
 
-use std::{
-    env,
-    path::{Path, PathBuf},
-    sync::mpsc::Sender,
-};
+use std::{env, path::Path, sync::mpsc::Sender};
 
 pub use app::TemplateApp;
 use log::{error, warn};
@@ -24,9 +20,6 @@ pub const PLOX_CONF_FILE: &str = "plox.toml";
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, Default)]
 struct AppSettings {
-    /// Specifies an openmw config file to use
-    config: Option<PathBuf>,
-
     /// Specifies the game to use
     game: Option<plox::ESupportedGame>,
 
@@ -111,7 +104,7 @@ fn init_parser(settings: AppSettings, tx: Sender<String>) -> Option<AppData> {
 
     // mods
     let _ = tx.send("Gathering mods".to_string());
-    let mods = gather_mods(&root, game, &game_version, settings.config);
+    let mods = gather_mods(&root, game, &game_version);
 
     // parser
     let mut parser = parser::get_parser(game, game_version.clone());

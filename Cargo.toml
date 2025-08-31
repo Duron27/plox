@@ -24,9 +24,9 @@ description.workspace = true
 documentation.workspace = true
 
 [dependencies]
-openmw-cfg = "0.5"                                              # move to feature flag
+openmw-cfg = "0.6"                                              # move to feature flag
 clap = { version = "4.5", features = ["derive"] }
-petgraph = "0.7"
+petgraph = "0.8"
 rust-ini = "0.21"
 regex = "1.11"
 reqwest = { version = "0.12", features = ["blocking", "json"] }

@@ -13,7 +13,6 @@ pub struct CliSortOptions {
     pub dry_run: bool,
     pub unstable: bool,
     pub no_download: bool,
-    pub config: Option<PathBuf>,
 }
 
 /// Sorts the current mod load order according to specified rules
@@ -25,7 +24,6 @@ pub fn sort(options: CliSortOptions) -> ExitCode {
     let dry_run = options.dry_run;
     let unstable = options.unstable;
     let no_download = options.no_download;
-    let config = options.config;
 
     // get game root
     let root = match root {
@@ -56,7 +54,7 @@ pub fn sort(options: CliSortOptions) -> ExitCode {
         mods = match game {
             ESupportedGame::Morrowind => gather_tes3_mods(&root),
             ESupportedGame::Cyberpunk => gather_cp77_mods(&root, &game_version),
-            ESupportedGame::Openmw => gather_openmw_mods(&config),
+            ESupportedGame::Openmw => gather_openmw_mods(),
         };
         if mods.is_empty() {
             info!("No mods found");
@@ -158,7 +156,7 @@ pub fn sort(options: CliSortOptions) -> ExitCode {
                     } else {
                         info!("New:\n{:?}", result);
 
-                        match update_new_load_order(game, &result, config) {
+                        match update_new_load_order(game, &result) {
                             Ok(_) => {
                                 info!("Update successful");
                                 ExitCode::SUCCESS

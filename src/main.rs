@@ -53,20 +53,12 @@ enum Command {
         /// Read the input mods from a file instead of checking the root folder
         #[arg(short, long)]
         mod_list: Option<PathBuf>,
-
-        /// (OpenMW only) Path to the openmw.cfg file
-        #[arg(short, long)]
-        config: Option<PathBuf>,
     },
     /// Lists the current mod load order
     List {
         /// Root game folder (e.g. "Cyberpunk 2077" or "Morrowind"). Default is current working directory
         #[arg(short, long)]
         root: Option<PathBuf>,
-
-        /// (OpenMW only) Path to the openmw.cfg file
-        #[arg(short, long)]
-        config: Option<PathBuf>,
     },
     /// Verifies integrity of the specified rules
     Verify {
@@ -87,10 +79,6 @@ enum Command {
         /// Read the input mods from a file instead of checking the root folder
         #[arg(short, long)]
         mod_list: Option<PathBuf>,
-
-        /// (OpenMW only) Path to the openmw.cfg file
-        #[arg(short, long)]
-        config: Option<PathBuf>,
     },
 }
 
@@ -138,14 +126,13 @@ fn main() -> ExitCode {
     };
 
     let code = match &cli.command {
-        Command::List { root, config } => list_mods(root, game, config.clone()),
+        Command::List { root } => list_mods(root, game),
         Command::Verify { rules_dir } => verify(game, rules_dir),
         Command::Graph {
             game_folder,
             rules_dir,
             mod_list,
-            config,
-        } => graph(game, game_folder, rules_dir, mod_list, config.clone()),
+        } => graph(game, game_folder, rules_dir, mod_list),
         Command::Sort {
             game_folder: root,
             rules_dir,
@@ -153,7 +140,6 @@ fn main() -> ExitCode {
             dry_run,
             unstable,
             no_download,
-            config,
         } => sort(CliSortOptions {
             game,
             game_folder: root.clone(),
@@ -162,7 +148,6 @@ fn main() -> ExitCode {
             dry_run: *dry_run,
             unstable: *unstable,
             no_download: *no_download,
-            config: config.clone(),
         }),
     };
 

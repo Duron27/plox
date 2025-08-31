@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 use std::fs::File;
-use std::io::{BufRead, BufReader, Cursor, Error, ErrorKind, Read, Result, Seek, SeekFrom};
+use std::io::{BufRead, BufReader, Cursor, Error, Read, Result, Seek, SeekFrom};
 use std::path::Path;
 
 use byteorder::ReadBytesExt;
@@ -369,10 +369,7 @@ impl Parser {
                             rule = x.into();
                         } else {
                             // unknown rule, skip
-                            return Err(Error::new(
-                                ErrorKind::Other,
-                                "Parsing error: unknown rule",
-                            ));
+                            return Err(Error::other("Parsing error: unknown rule"));
                         }
                     }
 
@@ -431,15 +428,12 @@ impl Parser {
                         }
                     }
                 } else {
-                    Err(Error::new(ErrorKind::Other, "Parsing error: unknown rule"))
+                    Err(Error::other("Parsing error: unknown rule"))
                 }
             }
             _ => {
                 // error
-                Err(Error::new(
-                    ErrorKind::Other,
-                    "Parsing error: Not a rule start",
-                ))
+                Err(Error::other("Parsing error: Not a rule start"))
             }
         }
     }
@@ -649,7 +643,7 @@ impl Parser {
             // is a token
             // in this case just return an atomic
             if !self.ends_with_vec(reader) {
-                return Err(Error::new(ErrorKind::Other, "Parsing error: Not an atomic"));
+                return Err(Error::other("Parsing error: Not an atomic"));
             }
 
             return Ok(Atomic::from(reader).into());
@@ -675,10 +669,7 @@ impl Parser {
                     let expr = NOT::new(first);
                     Ok(expr.into())
                 } else {
-                    Err(Error::new(
-                        ErrorKind::Other,
-                        "Parsing error: unknown expression",
-                    ))
+                    Err(Error::other("Parsing error: unknown expression"))
                 }
             } else if let Some(rest) = reader.strip_prefix("[desc") {
                 let body = rest[..rest.len() - 1].trim_start();
@@ -687,8 +678,7 @@ impl Parser {
                     let expressions = self.parse_expressions(expr.as_bytes())?;
                     // check that it is of len 1
                     if expressions.len() != 1 {
-                        return Err(Error::new(
-                            ErrorKind::Other,
+                        return Err(Error::other(
                             "Parsing error: DESC expression must have exactly one child expression",
                         ));
                     }
@@ -699,15 +689,11 @@ impl Parser {
                         return Ok(expr.into());
                     }
 
-                    return Err(Error::new(
-                        ErrorKind::Other,
+                    return Err(Error::other(
                         "Parsing error: DESC expression must have an atomic child expression",
                     ));
                 }
-                Err(Error::new(
-                    ErrorKind::Other,
-                    "Parsing error: unknown expression",
-                ))
+                Err(Error::other("Parsing error: unknown expression"))
             } else if let Some(rest) = reader.strip_prefix("[size") {
                 let body = rest[..rest.len() - 1].trim_start();
                 if let Some((expr, size, negated)) = parse_size(body) {
@@ -715,8 +701,7 @@ impl Parser {
                     let expressions = self.parse_expressions(expr.as_bytes())?;
                     // check that it is of len 1
                     if expressions.len() != 1 {
-                        return Err(Error::new(
-                            ErrorKind::Other,
+                        return Err(Error::other(
                             "Parsing error: SIZE expression must have exactly one child expression",
                         ));
                     }
@@ -726,15 +711,11 @@ impl Parser {
                         return Ok(expr.into());
                     }
 
-                    return Err(Error::new(
-                        ErrorKind::Other,
+                    return Err(Error::other(
                         "Parsing error: SIZE expression must have an atomic child expression",
                     ));
                 }
-                Err(Error::new(
-                    ErrorKind::Other,
-                    "Parsing error: unknown expression",
-                ))
+                Err(Error::other("Parsing error: unknown expression"))
             } else if let Some(rest) = reader.strip_prefix("[ver") {
                 let body = rest[..rest.len() - 1].trim_start();
                 if let Some((expr, operator, version)) = parse_ver(body) {
@@ -742,8 +723,7 @@ impl Parser {
                     let expressions = self.parse_expressions(expr.as_bytes())?;
                     // check that it is of len 1
                     if expressions.len() != 1 {
-                        return Err(Error::new(
-                            ErrorKind::Other,
+                        return Err(Error::other(
                             "Parsing error: VER expression must have exactly one child expression",
                         ));
                     }
@@ -754,15 +734,11 @@ impl Parser {
                         return Ok(expr.into());
                     }
 
-                    return Err(Error::new(
-                        ErrorKind::Other,
+                    return Err(Error::other(
                         "Parsing error: VER expression must have an atomic child expression",
                     ));
                 }
-                Err(Error::new(
-                    ErrorKind::Other,
-                    "Parsing error: unknown expression",
-                ))
+                Err(Error::other("Parsing error: unknown expression"))
             } else if let Some(rest) = reader.strip_prefix("[gver") {
                 let body = rest[..rest.len() - 1].trim_start();
                 if let Some((expr, operator, version)) = parse_gver(body) {
@@ -770,8 +746,7 @@ impl Parser {
                     let expressions = self.parse_expressions(expr.as_bytes())?;
                     // check that it is of len 1
                     if expressions.len() != 1 {
-                        return Err(Error::new(
-                            ErrorKind::Other,
+                        return Err(Error::other(
                             "Parsing error: GVER expression must have exactly one child expression",
                         ));
                     }
@@ -782,27 +757,17 @@ impl Parser {
                         return Ok(expr.into());
                     }
 
-                    return Err(Error::new(
-                        ErrorKind::Other,
+                    return Err(Error::other(
                         "Parsing error: GVER expression must have an atomic child expression",
                     ));
                 }
-                Err(Error::new(
-                    ErrorKind::Other,
-                    "Parsing error: unknown expression",
-                ))
+                Err(Error::other("Parsing error: unknown expression"))
             } else {
                 // unknown expression
-                Err(Error::new(
-                    ErrorKind::Other,
-                    "Parsing error: unknown expression",
-                ))
+                Err(Error::other("Parsing error: unknown expression"))
             }
         } else {
-            Err(Error::new(
-                ErrorKind::Other,
-                "Parsing error: Not an expression",
-            ))
+            Err(Error::other("Parsing error: Not an expression"))
         }
     }
 }
